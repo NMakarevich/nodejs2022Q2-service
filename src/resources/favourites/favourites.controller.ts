@@ -50,7 +50,7 @@ export class FavouritesController {
     return this.favouritesService.removeAlbum(id);
   }
 
-  @Delete('artist/:id')
+  @Delete('track/:id')
   @HttpCode(204)
   removeTrack(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
     return this.favouritesService.removeTrack(id);
