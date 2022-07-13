@@ -57,7 +57,15 @@ export class AlbumService {
     ];
 
     this.db.tracks.forEach((track, index) => {
-      if (track.artistId === id) this.db.tracks[index].albumId = null;
+      if (track.albumId === id) this.db.tracks[index].albumId = null;
     });
+
+    const favIndex = this.db.favourites.albums.findIndex(
+      (album) => album.id === id,
+    );
+    this.db.favourites.albums = [
+      ...this.db.favourites.albums.slice(0, favIndex),
+      ...this.db.favourites.albums.slice(favIndex + 1),
+    ];
   }
 }

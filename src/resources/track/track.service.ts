@@ -54,5 +54,13 @@ export class TrackService {
       ...this.db.tracks.slice(0, trackIndex),
       ...this.db.tracks.slice(trackIndex + 1),
     ];
+
+    const favIndex = this.db.favourites.tracks.findIndex(
+      (track) => track.id === id,
+    );
+    this.db.favourites.tracks = [
+      ...this.db.favourites.tracks.slice(0, favIndex),
+      ...this.db.favourites.tracks.slice(favIndex + 1),
+    ];
   }
 }
