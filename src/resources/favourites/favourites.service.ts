@@ -1,17 +1,34 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  forwardRef,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { InMemoryDb } from '../../db/in-memory.db';
 import { NOT_FOUND_MESSAGE } from '../../consts/consts';
+import { ArtistService } from '../artist/artist.service';
+import { AlbumService } from '../album/album.service';
+import { TrackService } from '../track/track.service';
 
 @Injectable()
 export class FavouritesService {
-  constructor(private db: InMemoryDb) {}
+  constructor(
+    private db: InMemoryDb,
+    @Inject(forwardRef(() => ArtistService))
+    private readonly artistService: ArtistService,
+    @Inject(forwardRef(() => AlbumService))
+    private readonly albumService: AlbumService,
+    @Inject(forwardRef(() => TrackService))
+    private readonly trackService: TrackService,
+  ) {}
 
   findAll() {
     return this.db.favourites;
   }
 
   addArtist(id: string) {
-    const artist = this.db.artists.find((artist) => artist.id === id);
+    const artist = this.artistService.findOne(id);
     if (!artist)
       throw new HttpException(
         `Artist ${NOT_FOUND_MESSAGE}`,
@@ -22,7 +39,7 @@ export class FavouritesService {
   }
 
   addAlbum(id: string) {
-    const album = this.db.albums.find((album) => album.id === id);
+    const album = this.albumService.findOne(id);
     if (!album)
       throw new HttpException(
         `Album ${NOT_FOUND_MESSAGE}`,
@@ -33,7 +50,7 @@ export class FavouritesService {
   }
 
   addTrack(id: string) {
-    const track = this.db.tracks.find((track) => track.id === id);
+    const track = this.trackService.findOne(id);
     if (!track)
       throw new HttpException(
         `Track ${NOT_FOUND_MESSAGE}`,
@@ -43,11 +60,11 @@ export class FavouritesService {
     return { message: 'Successfully added' };
   }
 
-  removeArtist(id: string) {
+  removeArtist(id: string, skipError: boolean = false) {
     const artistIndex = this.db.favourites.artists.findIndex(
       (artist) => artist.id === id,
     );
-    if (artistIndex === -1)
+    if (artistIndex === -1 && !skipError)
       throw new HttpException(
         `Artist ${NOT_FOUND_MESSAGE}`,
         HttpStatus.UNPROCESSABLE_ENTITY,
@@ -58,11 +75,11 @@ export class FavouritesService {
     ];
   }
 
-  removeAlbum(id: string) {
+  removeAlbum(id: string, skipError: boolean = false) {
     const albumIndex = this.db.favourites.albums.findIndex(
       (album) => album.id === id,
     );
-    if (albumIndex === -1)
+    if (albumIndex === -1 && !skipError)
       throw new HttpException(
         `Album ${NOT_FOUND_MESSAGE}`,
         HttpStatus.UNPROCESSABLE_ENTITY,
@@ -73,11 +90,11 @@ export class FavouritesService {
     ];
   }
 
-  removeTrack(id: string) {
+  removeTrack(id: string, skipError: boolean = false) {
     const trackIndex = this.db.favourites.tracks.findIndex(
       (track) => track.id === id,
     );
-    if (trackIndex === -1)
+    if (trackIndex === -1 && !skipError)
       throw new HttpException(
         `Track ${NOT_FOUND_MESSAGE}`,
         HttpStatus.UNPROCESSABLE_ENTITY,

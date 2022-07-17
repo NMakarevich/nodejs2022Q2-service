@@ -1,14 +1,29 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  forwardRef,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
 import { AlbumModel } from './models/album.model';
 import { v4 as uuidv4 } from 'uuid';
 import { InMemoryDb } from '../../db/in-memory.db';
+import { FavouritesService } from '../favourites/favourites.service';
 import { NOT_FOUND_MESSAGE } from '../../consts/consts';
+import { TrackService } from '../track/track.service';
+import { UpdateTrackDto } from '../track/dto/update-track.dto';
 
 @Injectable()
 export class AlbumService {
-  constructor(private db: InMemoryDb) {}
+  constructor(
+    private db: InMemoryDb,
+    @Inject(forwardRef(() => FavouritesService))
+    private readonly favouritesService: FavouritesService,
+    @Inject(forwardRef(() => TrackService))
+    private readonly trackService: TrackService,
+  ) {}
 
   create(createAlbumDto: CreateAlbumDto): AlbumModel {
     const newAlbum = { ...createAlbumDto, id: uuidv4() };
@@ -22,11 +37,7 @@ export class AlbumService {
 
   findOne(id: string) {
     const album = this.db.albums.find((album) => album.id === id);
-    if (!album)
-      throw new HttpException(
-        `Album ${NOT_FOUND_MESSAGE}`,
-        HttpStatus.NOT_FOUND,
-      );
+    if (!album) return null;
     return album;
   }
 
@@ -56,16 +67,15 @@ export class AlbumService {
       ...this.db.albums.slice(albumIndex + 1),
     ];
 
-    this.db.tracks.forEach((track, index) => {
-      if (track.albumId === id) this.db.tracks[index].albumId = null;
+    const tracks = this.trackService.findAll();
+    tracks.forEach((track) => {
+      if (track.albumId === id) {
+        const updateTrackDto = new UpdateTrackDto();
+        updateTrackDto.albumId = null;
+        this.trackService.update(track.id, updateTrackDto);
+      }
     });
 
-    const favIndex = this.db.favourites.albums.findIndex(
-      (album) => album.id === id,
-    );
-    this.db.favourites.albums = [
-      ...this.db.favourites.albums.slice(0, favIndex),
-      ...this.db.favourites.albums.slice(favIndex + 1),
-    ];
+    this.favouritesService.removeAlbum(id, true);
   }
 }

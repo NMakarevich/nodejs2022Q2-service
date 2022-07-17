@@ -1,13 +1,32 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  forwardRef,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
 import { InMemoryDb } from '../../db/in-memory.db';
 import { v4 as uuidv4 } from 'uuid';
+import { FavouritesService } from '../favourites/favourites.service';
 import { NOT_FOUND_MESSAGE } from '../../consts/consts';
+import { AlbumService } from '../album/album.service';
+import { TrackService } from '../track/track.service';
+import { UpdateTrackDto } from '../track/dto/update-track.dto';
+import { UpdateAlbumDto } from '../album/dto/update-album.dto';
 
 @Injectable()
 export class ArtistService {
-  constructor(private db: InMemoryDb) {}
+  constructor(
+    private db: InMemoryDb,
+    @Inject(forwardRef(() => FavouritesService))
+    private readonly favouritesService: FavouritesService,
+    @Inject(forwardRef(() => AlbumService))
+    private readonly albumService: AlbumService,
+    @Inject(forwardRef(() => TrackService))
+    private readonly trackService: TrackService,
+  ) {}
 
   create(createArtistDto: CreateArtistDto) {
     const newArtist = { ...createArtistDto, id: uuidv4() };
@@ -21,11 +40,7 @@ export class ArtistService {
 
   findOne(id: string) {
     const artist = this.db.artists.find((artist) => artist.id === id);
-    if (!artist)
-      throw new HttpException(
-        `Artist ${NOT_FOUND_MESSAGE}`,
-        HttpStatus.NOT_FOUND,
-      );
+    if (!artist) return null;
     return artist;
   }
 
@@ -43,7 +58,7 @@ export class ArtistService {
     return updatedArtist;
   }
 
-  remove(id: string) {
+  remove(id: string): void {
     const artistIndex = this.db.artists.findIndex((artist) => artist.id === id);
     if (artistIndex === -1)
       throw new HttpException(
@@ -55,20 +70,24 @@ export class ArtistService {
       ...this.db.artists.slice(artistIndex + 1),
     ];
 
-    this.db.albums.forEach((album, index) => {
-      if (album.artistId === id) this.db.albums[index].artistId = null;
+    const albums = this.albumService.findAll();
+    albums.forEach((album) => {
+      if (album.artistId === id) {
+        const updateAlbumDto = new UpdateAlbumDto();
+        updateAlbumDto.artistId = null;
+        this.albumService.update(album.id, updateAlbumDto);
+      }
     });
 
-    this.db.tracks.forEach((track, index) => {
-      if (track.artistId === id) this.db.tracks[index].artistId = null;
+    const tracks = this.trackService.findAll();
+    tracks.forEach((track) => {
+      if (track.artistId === id) {
+        const updateTrackDto = new UpdateTrackDto();
+        updateTrackDto.artistId = null;
+        this.trackService.update(track.id, updateTrackDto);
+      }
     });
 
-    const favIndex = this.db.favourites.artists.findIndex(
-      (artist) => artist.id === id,
-    );
-    this.db.favourites.artists = [
-      ...this.db.favourites.artists.slice(0, favIndex),
-      ...this.db.favourites.artists.slice(favIndex + 1),
-    ];
+    this.favouritesService.removeArtist(id, true);
   }
 }

@@ -1,13 +1,24 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  forwardRef,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
 import { InMemoryDb } from '../../db/in-memory.db';
 import { v4 as uuidv4 } from 'uuid';
+import { FavouritesService } from '../favourites/favourites.service';
 import { NOT_FOUND_MESSAGE } from '../../consts/consts';
 
 @Injectable()
 export class TrackService {
-  constructor(private db: InMemoryDb) {}
+  constructor(
+    private db: InMemoryDb,
+    @Inject(forwardRef(() => FavouritesService))
+    private readonly favouritesService: FavouritesService,
+  ) {}
 
   create(createTrackDto: CreateTrackDto) {
     const newTrack = { ...createTrackDto, id: uuidv4() };
@@ -21,11 +32,7 @@ export class TrackService {
 
   findOne(id: string) {
     const track = this.db.tracks.find((track) => track.id === id);
-    if (!track)
-      throw new HttpException(
-        `Track ${NOT_FOUND_MESSAGE}`,
-        HttpStatus.NOT_FOUND,
-      );
+    if (!track) return null;
     return track;
   }
 
@@ -43,7 +50,7 @@ export class TrackService {
     return updatedTrack;
   }
 
-  remove(id: string) {
+  remove(id: string): void {
     const trackIndex = this.db.tracks.findIndex((track) => track.id === id);
     if (trackIndex === -1)
       throw new HttpException(
@@ -55,12 +62,6 @@ export class TrackService {
       ...this.db.tracks.slice(trackIndex + 1),
     ];
 
-    const favIndex = this.db.favourites.tracks.findIndex(
-      (track) => track.id === id,
-    );
-    this.db.favourites.tracks = [
-      ...this.db.favourites.tracks.slice(0, favIndex),
-      ...this.db.favourites.tracks.slice(favIndex + 1),
-    ];
+    this.favouritesService.removeTrack(id, true);
   }
 }
