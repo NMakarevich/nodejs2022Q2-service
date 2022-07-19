@@ -1,15 +1,9 @@
-import {
-  forwardRef,
-  HttpException,
-  HttpStatus,
-  Inject,
-  Injectable,
-} from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InMemoryDb } from '../../db/in-memory.db';
-import { NOT_FOUND_MESSAGE } from '../../consts/consts';
 import { ArtistService } from '../artist/artist.service';
 import { AlbumService } from '../album/album.service';
 import { TrackService } from '../track/track.service';
+import errorException from '../../common/errorException';
 
 @Injectable()
 export class FavouritesService {
@@ -24,84 +18,84 @@ export class FavouritesService {
   ) {}
 
   findAll() {
-    return this.db.favourites;
+    const { albums, artists, tracks } = this.db.favourites;
+
+    const albumsObjects = albums.map((albumId) =>
+      this.albumService.findOne(albumId),
+    );
+
+    const artistsObjects = artists.map((artistId) =>
+      this.artistService.findOne(artistId),
+    );
+
+    const tracksObjects = tracks.map((trackId) =>
+      this.trackService.findOne(trackId),
+    );
+
+    return {
+      albums: albumsObjects,
+      artists: artistsObjects,
+      tracks: tracksObjects,
+    };
   }
 
   addArtist(id: string) {
     const artist = this.artistService.findOne(id);
-    if (!artist)
-      throw new HttpException(
-        `Artist ${NOT_FOUND_MESSAGE}`,
-        HttpStatus.UNPROCESSABLE_ENTITY,
-      );
-    this.db.favourites.artists.push(artist);
+
+    if (!artist) errorException.unprocessableException('Artist');
+
+    this.db.favourites.artists.push(id);
     return { message: 'Successfully added' };
   }
 
   addAlbum(id: string) {
     const album = this.albumService.findOne(id);
-    if (!album)
-      throw new HttpException(
-        `Album ${NOT_FOUND_MESSAGE}`,
-        HttpStatus.UNPROCESSABLE_ENTITY,
-      );
-    this.db.favourites.albums.push(album);
+
+    if (!album) errorException.unprocessableException('Album');
+
+    this.db.favourites.albums.push(id);
     return { message: 'Successfully added' };
   }
 
   addTrack(id: string) {
     const track = this.trackService.findOne(id);
-    if (!track)
-      throw new HttpException(
-        `Track ${NOT_FOUND_MESSAGE}`,
-        HttpStatus.UNPROCESSABLE_ENTITY,
-      );
-    this.db.favourites.tracks.push(track);
+
+    if (!track) errorException.unprocessableException('Track');
+
+    this.db.favourites.tracks.push(id);
     return { message: 'Successfully added' };
   }
 
-  removeArtist(id: string, skipError: boolean = false) {
+  removeArtist(id: string, skipError = false) {
     const artistIndex = this.db.favourites.artists.findIndex(
-      (artist) => artist.id === id,
+      (artistId) => artistId === id,
     );
+
     if (artistIndex === -1 && !skipError)
-      throw new HttpException(
-        `Artist ${NOT_FOUND_MESSAGE}`,
-        HttpStatus.UNPROCESSABLE_ENTITY,
-      );
-    this.db.favourites.artists = [
-      ...this.db.favourites.artists.slice(0, artistIndex),
-      ...this.db.favourites.artists.slice(artistIndex + 1),
-    ];
+      errorException.unprocessableException('Artist');
+
+    this.db.favourites.artists.splice(artistIndex, 1);
   }
 
-  removeAlbum(id: string, skipError: boolean = false) {
+  removeAlbum(id: string, skipError = false) {
     const albumIndex = this.db.favourites.albums.findIndex(
-      (album) => album.id === id,
+      (albumId) => albumId === id,
     );
+
     if (albumIndex === -1 && !skipError)
-      throw new HttpException(
-        `Album ${NOT_FOUND_MESSAGE}`,
-        HttpStatus.UNPROCESSABLE_ENTITY,
-      );
-    this.db.favourites.albums = [
-      ...this.db.favourites.albums.slice(0, albumIndex),
-      ...this.db.favourites.albums.slice(albumIndex + 1),
-    ];
+      errorException.unprocessableException('Album');
+
+    this.db.favourites.albums.splice(albumIndex, 1);
   }
 
-  removeTrack(id: string, skipError: boolean = false) {
+  removeTrack(id: string, skipError = false) {
     const trackIndex = this.db.favourites.tracks.findIndex(
-      (track) => track.id === id,
+      (trackId) => trackId === id,
     );
+
     if (trackIndex === -1 && !skipError)
-      throw new HttpException(
-        `Track ${NOT_FOUND_MESSAGE}`,
-        HttpStatus.UNPROCESSABLE_ENTITY,
-      );
-    this.db.favourites.tracks = [
-      ...this.db.favourites.tracks.slice(0, trackIndex),
-      ...this.db.favourites.tracks.slice(trackIndex + 1),
-    ];
+      errorException.unprocessableException('Track');
+
+    this.db.favourites.tracks.splice(trackIndex, 1);
   }
 }

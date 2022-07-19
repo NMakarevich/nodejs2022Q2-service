@@ -8,14 +8,12 @@ import {
   ParseUUIDPipe,
   HttpCode,
   Put,
-  HttpStatus,
-  HttpException,
 } from '@nestjs/common';
 import { AlbumService } from './album.service';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
 import { AlbumModel } from './models/album.model';
-import { NOT_FOUND_MESSAGE } from '../../consts/consts';
+import errorException from '../../common/errorException';
 
 @Controller('album')
 export class AlbumController {
@@ -39,11 +37,7 @@ export class AlbumController {
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
   ): AlbumModel {
     const album = this.albumService.findOne(id);
-    if (!album)
-      throw new HttpException(
-        `Album ${NOT_FOUND_MESSAGE}`,
-        HttpStatus.NOT_FOUND,
-      );
+    if (!album) errorException.notFoundException('Album');
     return album;
   }
 

@@ -1,16 +1,10 @@
-import {
-  forwardRef,
-  HttpException,
-  HttpStatus,
-  Inject,
-  Injectable,
-} from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
 import { InMemoryDb } from '../../db/in-memory.db';
 import { v4 as uuidv4 } from 'uuid';
 import { FavouritesService } from '../favourites/favourites.service';
-import { NOT_FOUND_MESSAGE } from '../../consts/consts';
+import errorException from '../../common/errorException';
 
 @Injectable()
 export class TrackService {
@@ -38,30 +32,44 @@ export class TrackService {
 
   update(id: string, updateTrackDto: UpdateTrackDto) {
     const trackIndex = this.db.tracks.findIndex((track) => track.id === id);
-    if (trackIndex === -1)
-      throw new HttpException(
-        `Track ${NOT_FOUND_MESSAGE}`,
-        HttpStatus.NOT_FOUND,
-      );
+
+    if (trackIndex === -1) errorException.notFoundException('Track');
+
     const updatedTrack = Object.assign(this.db.tracks[trackIndex], {
       ...updateTrackDto,
     });
+
     this.db.tracks[trackIndex] = updatedTrack;
     return updatedTrack;
   }
 
   remove(id: string): void {
     const trackIndex = this.db.tracks.findIndex((track) => track.id === id);
-    if (trackIndex === -1)
-      throw new HttpException(
-        `Track ${NOT_FOUND_MESSAGE}`,
-        HttpStatus.NOT_FOUND,
-      );
-    this.db.tracks = [
-      ...this.db.tracks.slice(0, trackIndex),
-      ...this.db.tracks.slice(trackIndex + 1),
-    ];
+
+    if (trackIndex === -1) errorException.notFoundException('Track');
+
+    this.db.tracks.splice(trackIndex, 1);
 
     this.favouritesService.removeTrack(id, true);
+  }
+
+  removeAlbumId(id: string) {
+    this.db.tracks.forEach((track) => {
+      if (track.albumId === id) {
+        const updateTrackDto = new UpdateTrackDto();
+        updateTrackDto.albumId = null;
+        this.update(track.id, updateTrackDto);
+      }
+    });
+  }
+
+  removeArtistId(id: string) {
+    this.db.tracks.forEach((track) => {
+      if (track.artistId === id) {
+        const updateTrackDto = new UpdateTrackDto();
+        updateTrackDto.artistId = null;
+        this.update(track.id, updateTrackDto);
+      }
+    });
   }
 }
