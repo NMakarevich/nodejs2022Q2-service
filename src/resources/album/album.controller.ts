@@ -52,7 +52,7 @@ export class AlbumController {
   update(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @Body() updateAlbumDto: UpdateAlbumDto,
-  ) {
+  ): AlbumModel {
     return this.albumService.update(id, updateAlbumDto);
   }
 
