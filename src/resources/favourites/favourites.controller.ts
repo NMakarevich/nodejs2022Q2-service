@@ -8,6 +8,7 @@ import {
   ParseUUIDPipe,
 } from '@nestjs/common';
 import { FavouritesService } from './favourites.service';
+import { FavouritesResponseModel } from './models/favourites.model';
 
 @Controller('favs/')
 export class FavouritesController {
@@ -15,7 +16,7 @@ export class FavouritesController {
 
   @Get()
   @HttpCode(200)
-  findAll() {
+  findAll(): FavouritesResponseModel {
     return this.favouritesService.findAll();
   }
 
