@@ -14,7 +14,8 @@ import {
 import { ArtistService } from './artist.service';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
-import { NOT_FOUND_MESSAGE } from '../../consts/consts';
+import { ArtistModel } from './models/artist.model';
+import errorException from '../../common/errorException';
 
 @Controller('artist')
 export class ArtistController {
@@ -22,19 +23,21 @@ export class ArtistController {
 
   @Post()
   @HttpCode(201)
-  create(@Body() createArtistDto: CreateArtistDto) {
+  create(@Body() createArtistDto: CreateArtistDto): ArtistModel {
     return this.artistService.create(createArtistDto);
   }
 
   @Get()
   @HttpCode(200)
-  findAll() {
+  findAll(): ArtistModel[] {
     return this.artistService.findAll();
   }
 
   @Get(':id')
   @HttpCode(200)
-  findOne(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
+  findOne(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ): ArtistModel {
     const artist = this.artistService.findOne(id);
     if (!artist)
       throw new HttpException(
@@ -49,7 +52,7 @@ export class ArtistController {
   update(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @Body() updateArtistDto: UpdateArtistDto,
-  ) {
+  ): ArtistModel {
     return this.artistService.update(id, updateArtistDto);
   }
 

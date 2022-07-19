@@ -14,7 +14,8 @@ import {
 import { TrackService } from './track.service';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
-import { NOT_FOUND_MESSAGE } from '../../consts/consts';
+import { TrackModel } from './models/track.model';
+import errorException from '../../common/errorException';
 
 @Controller('track')
 export class TrackController {
@@ -22,19 +23,21 @@ export class TrackController {
 
   @Post()
   @HttpCode(201)
-  create(@Body() createTrackDto: CreateTrackDto) {
+  create(@Body() createTrackDto: CreateTrackDto): TrackModel {
     return this.trackService.create(createTrackDto);
   }
 
   @Get()
   @HttpCode(200)
-  findAll() {
+  findAll(): TrackModel[] {
     return this.trackService.findAll();
   }
 
   @Get(':id')
   @HttpCode(200)
-  findOne(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
+  findOne(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ): TrackModel {
     const track = this.trackService.findOne(id);
     if (!track)
       throw new HttpException(
@@ -49,7 +52,7 @@ export class TrackController {
   update(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @Body() updateTrackDto: UpdateTrackDto,
-  ) {
+  ): TrackModel {
     return this.trackService.update(id, updateTrackDto);
   }
 
