@@ -1,8 +1,6 @@
-import { PartialType } from '@nestjs/swagger';
-import { CreateTrackDto } from './create-track.dto';
 import { IsNumber, IsOptional, IsString } from 'class-validator';
 
-export class UpdateTrackDto extends PartialType(CreateTrackDto) {
+export class UpdateTrackDto {
   @IsString()
   @IsOptional()
   name: string;
