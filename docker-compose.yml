@@ -19,7 +19,13 @@ services:
     restart: always
   database:
     container_name: rest-service-database
-    build: ./Database/
+    build:
+      dockerfile: ./database/Dockerfile
+      context: ./database/
+    command: postgres -c logging_collector=on
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - postgres_logs:/var/log/postgresql/postgresql.log
     ports:
       - ${POSTGRES_PORT}:${POSTGRES_PORT}
     networks:
@@ -28,7 +34,11 @@ services:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB}
+    restart: always
 networks:
   rest-network:
     name: rest-network
     driver: bridge
+volumes:
+  postgres_logs:
+  postgres_data:
