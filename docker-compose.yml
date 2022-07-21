@@ -21,11 +21,10 @@ services:
     container_name: rest-service-database
     build:
       dockerfile: ./database/Dockerfile
-      context: ./database/
+      context: .
     command: postgres -c logging_collector=on
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - postgres_logs:/var/log/postgresql/postgresql.log
     ports:
       - ${POSTGRES_PORT}:${POSTGRES_PORT}
     networks:
@@ -40,5 +39,4 @@ networks:
     name: rest-network
     driver: bridge
 volumes:
-  postgres_logs:
   postgres_data:
