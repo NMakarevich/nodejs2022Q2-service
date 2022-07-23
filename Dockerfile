@@ -4,4 +4,6 @@ COPY package*.json .
 RUN npm install
 COPY . .
 EXPOSE 4000
-CMD ["npm", "run", "start"]
+RUN npx prisma generate
+CMD ["npm", "run", "start:dev"]
+RUN npx prisma migrate --name first-migration
