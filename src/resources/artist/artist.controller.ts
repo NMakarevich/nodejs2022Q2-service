@@ -21,22 +21,22 @@ export class ArtistController {
 
   @Post()
   @HttpCode(201)
-  create(@Body() createArtistDto: CreateArtistDto): ArtistModel {
+  create(@Body() createArtistDto: CreateArtistDto): Promise<ArtistModel> {
     return this.artistService.create(createArtistDto);
   }
 
   @Get()
   @HttpCode(200)
-  findAll(): ArtistModel[] {
+  findAll(): Promise<ArtistModel[]> {
     return this.artistService.findAll();
   }
 
   @Get(':id')
   @HttpCode(200)
-  findOne(
+  async findOne(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
-  ): ArtistModel {
-    const artist = this.artistService.findOne(id);
+  ): Promise<ArtistModel> {
+    const artist = await this.artistService.findOne(id);
     if (!artist) errorException.notFoundException('Artist');
     return artist;
   }
@@ -46,13 +46,15 @@ export class ArtistController {
   update(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @Body() updateArtistDto: UpdateArtistDto,
-  ): ArtistModel {
+  ): Promise<ArtistModel> {
     return this.artistService.update(id, updateArtistDto);
   }
 
   @Delete(':id')
   @HttpCode(204)
-  remove(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string): void {
-    this.artistService.remove(id);
+  remove(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ): Promise<void> {
+    return this.artistService.remove(id);
   }
 }

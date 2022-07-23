@@ -21,22 +21,22 @@ export class TrackController {
 
   @Post()
   @HttpCode(201)
-  create(@Body() createTrackDto: CreateTrackDto): TrackModel {
+  create(@Body() createTrackDto: CreateTrackDto): Promise<TrackModel> {
     return this.trackService.create(createTrackDto);
   }
 
   @Get()
   @HttpCode(200)
-  findAll(): TrackModel[] {
+  findAll(): Promise<TrackModel[]> {
     return this.trackService.findAll();
   }
 
   @Get(':id')
   @HttpCode(200)
-  findOne(
+  async findOne(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
-  ): TrackModel {
-    const track = this.trackService.findOne(id);
+  ): Promise<TrackModel> {
+    const track = await this.trackService.findOne(id);
     if (!track) errorException.notFoundException('Track');
     return track;
   }
@@ -46,13 +46,15 @@ export class TrackController {
   update(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @Body() updateTrackDto: UpdateTrackDto,
-  ): TrackModel {
+  ): Promise<TrackModel> {
     return this.trackService.update(id, updateTrackDto);
   }
 
   @Delete(':id')
   @HttpCode(204)
-  remove(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string): void {
-    this.trackService.remove(id);
+  remove(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ): Promise<void> {
+    return this.trackService.remove(id);
   }
 }

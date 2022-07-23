@@ -21,22 +21,22 @@ export class AlbumController {
 
   @Post()
   @HttpCode(201)
-  create(@Body() createAlbumDto: CreateAlbumDto): AlbumModel {
+  create(@Body() createAlbumDto: CreateAlbumDto): Promise<AlbumModel> {
     return this.albumService.create(createAlbumDto);
   }
 
   @Get()
   @HttpCode(200)
-  findAll(): AlbumModel[] {
+  findAll(): Promise<AlbumModel[]> {
     return this.albumService.findAll();
   }
 
   @Get(':id')
   @HttpCode(200)
-  findOne(
+  async findOne(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
-  ): AlbumModel {
-    const album = this.albumService.findOne(id);
+  ): Promise<AlbumModel> {
+    const album = await this.albumService.findOne(id);
     if (!album) errorException.notFoundException('Album');
     return album;
   }
@@ -46,13 +46,15 @@ export class AlbumController {
   update(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @Body() updateAlbumDto: UpdateAlbumDto,
-  ): AlbumModel {
+  ): Promise<AlbumModel> {
     return this.albumService.update(id, updateAlbumDto);
   }
 
   @Delete(':id')
   @HttpCode(204)
-  remove(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string): void {
-    this.albumService.remove(id);
+  remove(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ): Promise<void> {
+    return this.albumService.remove(id);
   }
 }
