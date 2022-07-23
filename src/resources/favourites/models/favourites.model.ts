@@ -9,7 +9,7 @@ export interface FavouritesModel {
 }
 
 export interface FavouritesResponseModel {
-  artists: ArtistModel[];
-  albums: AlbumModel[];
-  tracks: TrackModel[];
+  artists: Promise<ArtistModel>[];
+  albums: Promise<AlbumModel>[];
+  tracks: Promise<TrackModel>[];
 }
