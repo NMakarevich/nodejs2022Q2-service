@@ -3,7 +3,7 @@ import { AppModule } from './app.module';
 import { SwaggerModule } from '@nestjs/swagger';
 import 'dotenv/config';
 import { readFile } from 'fs/promises';
-import { join } from 'path';
+import { resolve } from 'path';
 import { parse } from 'yaml';
 import { ValidationPipe } from '@nestjs/common';
 
@@ -15,7 +15,7 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
 
   const document = await readFile(
-    join(__dirname, '..', 'doc/api.yaml'),
+    resolve(process.cwd(), 'doc', 'api.yaml'),
     'utf-8',
   );
 
