@@ -1,14 +1,13 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
-import { InMemoryDb } from '../../db/in-memory.db';
 import { ArtistService } from '../artist/artist.service';
 import { AlbumService } from '../album/album.service';
 import { TrackService } from '../track/track.service';
 import errorException from '../../common/errorException';
+import prisma from '../../../prisma/prisma-client';
 
 @Injectable()
 export class FavouritesService {
   constructor(
-    private db: InMemoryDb,
     @Inject(forwardRef(() => ArtistService))
     private readonly artistService: ArtistService,
     @Inject(forwardRef(() => AlbumService))
@@ -17,85 +16,118 @@ export class FavouritesService {
     private readonly trackService: TrackService,
   ) {}
 
-  findAll() {
-    const { albums, artists, tracks } = this.db.favourites;
+  create = async () => {
+    await prisma.favourites.create({
+      data: {
+        albumsIds: [],
+        artistsIds: [],
+        tracksIds: [],
+      },
+    });
+  };
 
-    const albumsObjects = albums.map((albumId) =>
-      this.albumService.findOne(albumId),
+  getFavourites = async () => {
+    let favourites = await prisma.favourites.findFirst();
+    if (!favourites) {
+      await this.create();
+      favourites = await prisma.favourites.findFirst();
+    }
+    return favourites;
+  };
+
+  findAll = async () => {
+    const { albumsIds, artistsIds, tracksIds } = await this.getFavourites();
+
+    const albums = await Promise.all(
+      albumsIds.map((id) => this.albumService.findOne(id)),
     );
 
-    const artistsObjects = artists.map((artistId) =>
-      this.artistService.findOne(artistId),
+    const artists = await Promise.all(
+      artistsIds.map((id) => this.artistService.findOne(id)),
     );
 
-    const tracksObjects = tracks.map((trackId) =>
-      this.trackService.findOne(trackId),
+    const tracks = await Promise.all(
+      tracksIds.map((id) => this.trackService.findOne(id)),
     );
 
     return {
-      albums: albumsObjects,
-      artists: artistsObjects,
-      tracks: tracksObjects,
+      albums: albums.filter((album) => album),
+      artists: artists.filter((artist) => artist),
+      tracks: tracks.filter((track) => track),
     };
-  }
+  };
 
-  addArtist(id: string) {
-    const artist = this.artistService.findOne(id);
-
+  addArtist = async (artistId: string) => {
+    const artist = await this.artistService.findOne(artistId);
     if (!artist) errorException.unprocessableException('Artist');
 
-    this.db.favourites.artists.push(id);
+    const { id } = await this.getFavourites();
+
+    await prisma.favourites.update({
+      where: { id },
+      data: { artistsIds: { push: artistId } },
+    });
     return { message: 'Successfully added' };
-  }
+  };
 
-  addAlbum(id: string) {
-    const album = this.albumService.findOne(id);
-
+  addAlbum = async (albumId: string) => {
+    const album = await this.albumService.findOne(albumId);
     if (!album) errorException.unprocessableException('Album');
 
-    this.db.favourites.albums.push(id);
+    const { id } = await this.getFavourites();
+
+    await prisma.favourites.update({
+      where: { id },
+      data: { albumsIds: { push: albumId } },
+    });
     return { message: 'Successfully added' };
-  }
+  };
 
-  addTrack(id: string) {
-    const track = this.trackService.findOne(id);
-
+  addTrack = async (trackId: string) => {
+    const track = await this.trackService.findOne(trackId);
     if (!track) errorException.unprocessableException('Track');
 
-    this.db.favourites.tracks.push(id);
+    const { id } = await this.getFavourites();
+
+    await prisma.favourites.update({
+      where: { id },
+      data: { tracksIds: { push: trackId } },
+    });
     return { message: 'Successfully added' };
-  }
+  };
 
-  removeArtist(id: string, skipError = false) {
-    const artistIndex = this.db.favourites.artists.findIndex(
-      (artistId) => artistId === id,
-    );
-
-    if (artistIndex === -1 && !skipError)
+  removeArtist = async (artistId: string, skipError = false) => {
+    const { id, artistsIds } = await prisma.favourites.findFirst();
+    if (!artistsIds.includes(artistId) && !skipError)
       errorException.unprocessableException('Artist');
 
-    this.db.favourites.artists.splice(artistIndex, 1);
-  }
+    await prisma.favourites.update({
+      where: { id },
+      data: { artistsIds: artistsIds.filter((id) => id !== artistId) },
+    });
+  };
 
-  removeAlbum(id: string, skipError = false) {
-    const albumIndex = this.db.favourites.albums.findIndex(
-      (albumId) => albumId === id,
-    );
+  removeAlbum = async (albumId: string, skipError = false) => {
+    const { id, albumsIds } = await prisma.favourites.findFirst();
 
-    if (albumIndex === -1 && !skipError)
+    if (!albumsIds.includes(albumId) && !skipError)
       errorException.unprocessableException('Album');
 
-    this.db.favourites.albums.splice(albumIndex, 1);
-  }
+    await prisma.favourites.update({
+      where: { id },
+      data: { albumsIds: albumsIds.filter((id) => id !== albumId) },
+    });
+  };
 
-  removeTrack(id: string, skipError = false) {
-    const trackIndex = this.db.favourites.tracks.findIndex(
-      (trackId) => trackId === id,
-    );
+  removeTrack = async (trackId: string, skipError = false) => {
+    const { id, tracksIds } = await prisma.favourites.findFirst();
 
-    if (trackIndex === -1 && !skipError)
+    if (!tracksIds.includes(trackId) && !skipError)
       errorException.unprocessableException('Track');
 
-    this.db.favourites.tracks.splice(trackIndex, 1);
-  }
+    await prisma.favourites.update({
+      where: { id },
+      data: { tracksIds: tracksIds.filter((id) => id !== trackId) },
+    });
+  };
 }

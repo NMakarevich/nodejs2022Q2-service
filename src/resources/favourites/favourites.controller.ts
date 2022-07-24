@@ -16,7 +16,7 @@ export class FavouritesController {
 
   @Get()
   @HttpCode(200)
-  findAll(): FavouritesResponseModel {
+  findAll(): Promise<FavouritesResponseModel> {
     return this.favouritesService.findAll();
   }
 
@@ -40,25 +40,25 @@ export class FavouritesController {
 
   @Delete('artist/:id')
   @HttpCode(204)
-  removeArtist(
+  async removeArtist(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
-  ): void {
-    this.favouritesService.removeArtist(id);
+  ): Promise<void> {
+    await this.favouritesService.removeArtist(id);
   }
 
   @Delete('album/:id')
   @HttpCode(204)
-  removeAlbum(
+  async removeAlbum(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
-  ): void {
-    this.favouritesService.removeAlbum(id);
+  ): Promise<void> {
+    await this.favouritesService.removeAlbum(id);
   }
 
   @Delete('track/:id')
   @HttpCode(204)
-  removeTrack(
+  async removeTrack(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
-  ): void {
-    this.favouritesService.removeTrack(id);
+  ): Promise<void> {
+    await this.favouritesService.removeTrack(id);
   }
 }

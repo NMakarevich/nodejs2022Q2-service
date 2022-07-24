@@ -13,7 +13,7 @@ model User {
   password  String
   version   Int      @default(1)
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @updatedAt @default(now())
 }
 
 model Album {
@@ -41,4 +41,11 @@ model Track {
   duration Int
   album    Album?  @relation(fields: [albumId], references: [id])
   artist   Artist? @relation(fields: [artistId], references: [id])
+}
+
+model Favourites {
+  id         String   @id @default(uuid())
+  albumsIds  String[]
+  artistsIds String[]
+  tracksIds  String[]
 }

@@ -50,7 +50,10 @@ export class TrackService {
   remove = async (id: string) => {
     const track = await prisma.track.findFirst({ where: { id } });
     if (!track) errorException.notFoundException('Track');
+
     await prisma.track.delete({ where: { id } });
+
+    await this.favouritesService.removeTrack(id, true);
   };
 
   removeAlbumId = async (id: string) => {

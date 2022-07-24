@@ -44,7 +44,6 @@ export class ArtistService {
 
   remove = async (id: string) => {
     const artist = await prisma.artist.findFirst({ where: { id } });
-
     if (!artist) errorException.notFoundException('Artist');
 
     await prisma.artist.delete({ where: { id } });
@@ -53,6 +52,6 @@ export class ArtistService {
 
     await this.trackService.removeArtistId(id);
 
-    // this.favouritesService.removeArtist(id, true);
+    await this.favouritesService.removeArtist(id, true);
   };
 }
