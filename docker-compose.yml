@@ -4,7 +4,6 @@ services:
     build:
       dockerfile: Dockerfile
       context: .
-    command: npm run start:dev
     volumes:
       - .:/usr/app
       - /usr/app/node_modules
