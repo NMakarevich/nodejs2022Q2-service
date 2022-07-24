@@ -3,7 +3,7 @@ WORKDIR /usr/app
 COPY package*.json .
 RUN npm install
 COPY . .
-EXPOSE 4000
+EXPOSE ${PORT}
 RUN npx prisma generate
 CMD ["npm", "run", "server"]
 
