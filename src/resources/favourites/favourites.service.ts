@@ -97,7 +97,7 @@ export class FavouritesService {
   };
 
   removeArtist = async (artistId: string, skipError = false) => {
-    const { id, artistsIds } = await prisma.favourites.findFirst();
+    const { id, artistsIds } = await this.getFavourites();
     if (!artistsIds.includes(artistId) && !skipError)
       errorException.unprocessableException('Artist');
 
@@ -108,7 +108,7 @@ export class FavouritesService {
   };
 
   removeAlbum = async (albumId: string, skipError = false) => {
-    const { id, albumsIds } = await prisma.favourites.findFirst();
+    const { id, albumsIds } = await this.getFavourites();
 
     if (!albumsIds.includes(albumId) && !skipError)
       errorException.unprocessableException('Album');
@@ -120,7 +120,7 @@ export class FavouritesService {
   };
 
   removeTrack = async (trackId: string, skipError = false) => {
-    const { id, tracksIds } = await prisma.favourites.findFirst();
+    const { id, tracksIds } = await this.getFavourites();
 
     if (!tracksIds.includes(trackId) && !skipError)
       errorException.unprocessableException('Track');
