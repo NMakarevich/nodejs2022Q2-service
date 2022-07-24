@@ -37,7 +37,7 @@ export class AlbumService {
   };
 
   update = async (id: string, updateAlbumDto: UpdateAlbumDto) => {
-    const album = prisma.album.findFirst({ where: { id } });
+    const album = await prisma.album.findFirst({ where: { id } });
     if (!album) errorException.notFoundException('Album');
 
     return await prisma.album.update({
