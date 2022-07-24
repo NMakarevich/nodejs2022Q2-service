@@ -21,14 +21,14 @@ export class TrackController {
 
   @Post()
   @HttpCode(201)
-  create(@Body() createTrackDto: CreateTrackDto): Promise<TrackModel> {
-    return this.trackService.create(createTrackDto);
+  async create(@Body() createTrackDto: CreateTrackDto): Promise<TrackModel> {
+    return await this.trackService.create(createTrackDto);
   }
 
   @Get()
   @HttpCode(200)
-  findAll(): Promise<TrackModel[]> {
-    return this.trackService.findAll();
+  async findAll(): Promise<TrackModel[]> {
+    return await this.trackService.findAll();
   }
 
   @Get(':id')
@@ -43,18 +43,18 @@ export class TrackController {
 
   @Put(':id')
   @HttpCode(200)
-  update(
+  async update(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @Body() updateTrackDto: UpdateTrackDto,
   ): Promise<TrackModel> {
-    return this.trackService.update(id, updateTrackDto);
+    return await this.trackService.update(id, updateTrackDto);
   }
 
   @Delete(':id')
   @HttpCode(204)
-  remove(
+  async remove(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
   ): Promise<void> {
-    return this.trackService.remove(id);
+    return await this.trackService.remove(id);
   }
 }

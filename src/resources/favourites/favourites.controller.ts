@@ -16,26 +16,28 @@ export class FavouritesController {
 
   @Get()
   @HttpCode(200)
-  findAll(): Promise<FavouritesResponseModel> {
-    return this.favouritesService.findAll();
+  async findAll(): Promise<FavouritesResponseModel> {
+    return await this.favouritesService.findAll();
   }
 
   @Post('track/:id')
   @HttpCode(201)
-  addTrack(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
-    return this.favouritesService.addTrack(id);
+  async addTrack(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
+    return await this.favouritesService.addTrack(id);
   }
 
   @Post('artist/:id')
   @HttpCode(201)
-  addArtist(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
-    return this.favouritesService.addArtist(id);
+  async addArtist(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ) {
+    return await this.favouritesService.addArtist(id);
   }
 
   @Post('album/:id')
   @HttpCode(201)
-  addAlbum(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
-    return this.favouritesService.addAlbum(id);
+  async addAlbum(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
+    return await this.favouritesService.addAlbum(id);
   }
 
   @Delete('artist/:id')
