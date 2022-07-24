@@ -7,9 +7,11 @@
 
 ## Downloading
 
-```
-git clone {repository URL}
-```
+In your terminal enter next commands
+1. `git clone https://github.com/NMakarevich/nodejs2022Q2-service`
+2. `cd nodejs2022Q2-service`
+3. `git chekout postgresql-orm`
+
 
 ## Installing NPM modules
 
@@ -19,13 +21,12 @@ npm install
 
 ## Using .env
 
-Rename file `.env.example` to `.env` and enter the number of port.
+Create `.env` file using `.env.example` as example. 
 
 ## Running application
 
-```
-npm start
-```
+1. Run Docker app
+2. In terminal enter `docker-compose up`
 
 After starting the app on port (4000 as default) you can open
 in your browser OpenAPI documentation by typing http://localhost:4000/doc/.
@@ -68,9 +69,3 @@ npm run lint
 ```
 npm run format
 ```
-
-### Debugging in VSCode
-
-Press <kbd>F5</kbd> to debug.
-
-For more information, visit: https://code.visualstudio.com/docs/editor/debugging
