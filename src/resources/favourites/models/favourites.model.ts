@@ -1,6 +1,6 @@
-import { ArtistModel } from '../../artist/models/artist.model';
-import { AlbumModel } from '../../album/models/album.model';
-import { TrackModel } from '../../track/models/track.model';
+import { ArtistEntity } from '../../artist/entities/artist.entity';
+import { AlbumEntity } from '../../album/entities/album.entity';
+import { TrackEntity } from '../../track/entities/track.entity';
 
 export interface FavouritesModel {
   artists: string[];
@@ -9,7 +9,7 @@ export interface FavouritesModel {
 }
 
 export interface FavouritesResponseModel {
-  artists: ArtistModel[];
-  albums: AlbumModel[];
-  tracks: TrackModel[];
+  artists: ArtistEntity[];
+  albums: AlbumEntity[];
+  tracks: TrackEntity[];
 }

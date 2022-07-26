@@ -1,14 +1,17 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
-import { InMemoryDb } from '../../db/in-memory.db';
 import { ArtistService } from '../artist/artist.service';
 import { AlbumService } from '../album/album.service';
 import { TrackService } from '../track/track.service';
 import errorException from '../../common/errorException';
+import { InjectRepository } from '@nestjs/typeorm';
+import { FavouritesEntity } from './entities/favourites.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class FavouritesService {
   constructor(
-    private db: InMemoryDb,
+    @InjectRepository(FavouritesEntity)
+    private readonly favouritesRepository: Repository<FavouritesEntity>,
     @Inject(forwardRef(() => ArtistService))
     private readonly artistService: ArtistService,
     @Inject(forwardRef(() => AlbumService))
@@ -17,85 +20,115 @@ export class FavouritesService {
     private readonly trackService: TrackService,
   ) {}
 
-  findAll() {
-    const { albums, artists, tracks } = this.db.favourites;
+  create = async () => {
+    const favourites = this.favouritesRepository.create();
+    favourites.tracksIds = [];
+    favourites.albumsIds = [];
+    favourites.artistsIds = [];
+    await this.favouritesRepository.save(favourites);
+  };
 
-    const albumsObjects = albums.map((albumId) =>
-      this.albumService.findOne(albumId),
+  getFavourites = async () => {
+    let favourites = await this.favouritesRepository.find();
+    if (favourites.length === 0) {
+      await this.create();
+      favourites = await this.favouritesRepository.find();
+    }
+    return favourites[0];
+  };
+
+  findAll = async () => {
+    const { albumsIds, artistsIds, tracksIds } = await this.getFavourites();
+
+    const albumsObjects = await Promise.all(
+      albumsIds.map((albumId) => this.albumService.findOne(albumId)),
     );
-
-    const artistsObjects = artists.map((artistId) =>
-      this.artistService.findOne(artistId),
+    const artistsObjects = await Promise.all(
+      artistsIds.map((artistId) => this.artistService.findOne(artistId)),
     );
-
-    const tracksObjects = tracks.map((trackId) =>
-      this.trackService.findOne(trackId),
+    const tracksObjects = await Promise.all(
+      tracksIds.map((trackId) => this.trackService.findOne(trackId)),
     );
 
     return {
-      albums: albumsObjects,
-      artists: artistsObjects,
-      tracks: tracksObjects,
+      albums: albumsObjects.filter((album) => album),
+      artists: artistsObjects.filter((artist) => artist),
+      tracks: tracksObjects.filter((track) => track),
     };
-  }
+  };
 
-  addArtist(id: string) {
-    const artist = this.artistService.findOne(id);
-
+  addArtist = async (artistId: string) => {
+    const artist = await this.artistService.findOne(artistId);
     if (!artist) errorException.unprocessableException('Artist');
 
-    this.db.favourites.artists.push(id);
+    const favourites = await this.getFavourites();
+    favourites.artistsIds.push(artistId);
+
+    await this.favouritesRepository.save(favourites);
+
     return { message: 'Successfully added' };
-  }
+  };
 
-  addAlbum(id: string) {
-    const album = this.albumService.findOne(id);
-
+  addAlbum = async (albumId: string) => {
+    const album = await this.albumService.findOne(albumId);
     if (!album) errorException.unprocessableException('Album');
 
-    this.db.favourites.albums.push(id);
+    const favourites = await this.getFavourites();
+    favourites.albumsIds.push(albumId);
+
+    await this.favouritesRepository.save(favourites);
+
     return { message: 'Successfully added' };
-  }
+  };
 
-  addTrack(id: string) {
-    const track = this.trackService.findOne(id);
-
+  addTrack = async (trackId: string) => {
+    const track = await this.trackService.findOne(trackId);
     if (!track) errorException.unprocessableException('Track');
 
-    this.db.favourites.tracks.push(id);
-    return { message: 'Successfully added' };
-  }
+    const favourites = await this.getFavourites();
+    favourites.tracksIds.push(trackId);
 
-  removeArtist(id: string, skipError = false) {
-    const artistIndex = this.db.favourites.artists.findIndex(
+    await this.favouritesRepository.save(favourites);
+
+    return { message: 'Successfully added' };
+  };
+
+  removeArtist = async (id: string, skipError = false) => {
+    const favourites = await this.getFavourites();
+    const artistIndex = favourites.artistsIds.findIndex(
       (artistId) => artistId === id,
     );
 
     if (artistIndex === -1 && !skipError)
       errorException.unprocessableException('Artist');
 
-    this.db.favourites.artists.splice(artistIndex, 1);
-  }
+    favourites.artistsIds.splice(artistIndex, 1);
+    await this.favouritesRepository.save(favourites);
+  };
 
-  removeAlbum(id: string, skipError = false) {
-    const albumIndex = this.db.favourites.albums.findIndex(
+  removeAlbum = async (id: string, skipError = false) => {
+    const favourites = await this.getFavourites();
+    const albumIndex = favourites.albumsIds.findIndex(
       (albumId) => albumId === id,
     );
 
     if (albumIndex === -1 && !skipError)
       errorException.unprocessableException('Album');
 
-    this.db.favourites.albums.splice(albumIndex, 1);
-  }
+    favourites.albumsIds.splice(albumIndex, 1);
+    await this.favouritesRepository.save(favourites);
+  };
 
-  removeTrack(id: string, skipError = false) {
-    const trackIndex = this.db.favourites.tracks.findIndex(
+  removeTrack = async (id: string, skipError = false) => {
+    const favourites = await this.getFavourites();
+    const trackIndex = favourites.tracksIds.findIndex(
       (trackId) => trackId === id,
     );
 
     if (trackIndex === -1 && !skipError)
       errorException.unprocessableException('Track');
 
-    this.db.favourites.tracks.splice(trackIndex, 1);
-  }
+    favourites.tracksIds.splice(trackIndex, 1);
+    await this.favouritesRepository.save(favourites);
+  };
 }
