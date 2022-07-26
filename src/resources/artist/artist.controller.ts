@@ -12,8 +12,8 @@ import {
 import { ArtistService } from './artist.service';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
-import { ArtistModel } from './models/artist.model';
 import errorException from '../../common/errorException';
+import { ArtistEntity } from './entities/artist.entity';
 
 @Controller('artist')
 export class ArtistController {
@@ -21,38 +21,42 @@ export class ArtistController {
 
   @Post()
   @HttpCode(201)
-  create(@Body() createArtistDto: CreateArtistDto): ArtistModel {
-    return this.artistService.create(createArtistDto);
+  async create(
+    @Body() createArtistDto: CreateArtistDto,
+  ): Promise<ArtistEntity> {
+    return await this.artistService.create(createArtistDto);
   }
 
   @Get()
   @HttpCode(200)
-  findAll(): ArtistModel[] {
-    return this.artistService.findAll();
+  async findAll(): Promise<ArtistEntity[]> {
+    return await this.artistService.findAll();
   }
 
   @Get(':id')
   @HttpCode(200)
-  findOne(
+  async findOne(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
-  ): ArtistModel {
-    const artist = this.artistService.findOne(id);
+  ): Promise<ArtistEntity> {
+    const artist = await this.artistService.findOne(id);
     if (!artist) errorException.notFoundException('Artist');
     return artist;
   }
 
   @Put(':id')
   @HttpCode(200)
-  update(
+  async update(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @Body() updateArtistDto: UpdateArtistDto,
-  ): ArtistModel {
-    return this.artistService.update(id, updateArtistDto);
+  ): Promise<ArtistEntity> {
+    return await this.artistService.update(id, updateArtistDto);
   }
 
   @Delete(':id')
   @HttpCode(204)
-  remove(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string): void {
-    this.artistService.remove(id);
+  async remove(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ): Promise<void> {
+    await this.artistService.remove(id);
   }
 }
