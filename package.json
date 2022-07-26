@@ -13,6 +13,8 @@
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
+    "typeorm:migration:run": "typeorm migration:run -d ./dist/src/data-source.js",
+    "server:start": "npm run build && npm run typeorm:migration:run && npm run start:dev",
     "scan": "docker scan nodejs2022q2-service_server",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest --config ./test/jest-e2e.json",
