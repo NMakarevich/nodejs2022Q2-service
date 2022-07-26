@@ -12,8 +12,8 @@ import {
 import { AlbumService } from './album.service';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
-import { AlbumModel } from './models/album.model';
 import errorException from '../../common/errorException';
+import { AlbumEntity } from './entities/album.entity';
 
 @Controller('album')
 export class AlbumController {
@@ -21,38 +21,40 @@ export class AlbumController {
 
   @Post()
   @HttpCode(201)
-  create(@Body() createAlbumDto: CreateAlbumDto): AlbumModel {
-    return this.albumService.create(createAlbumDto);
+  async create(@Body() createAlbumDto: CreateAlbumDto): Promise<AlbumEntity> {
+    return await this.albumService.create(createAlbumDto);
   }
 
   @Get()
   @HttpCode(200)
-  findAll(): AlbumModel[] {
-    return this.albumService.findAll();
+  async findAll(): Promise<AlbumEntity[]> {
+    return await this.albumService.findAll();
   }
 
   @Get(':id')
   @HttpCode(200)
-  findOne(
+  async findOne(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
-  ): AlbumModel {
-    const album = this.albumService.findOne(id);
+  ): Promise<AlbumEntity> {
+    const album = await this.albumService.findOne(id);
     if (!album) errorException.notFoundException('Album');
     return album;
   }
 
   @Put(':id')
   @HttpCode(200)
-  update(
+  async update(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @Body() updateAlbumDto: UpdateAlbumDto,
-  ): AlbumModel {
-    return this.albumService.update(id, updateAlbumDto);
+  ): Promise<AlbumEntity> {
+    return await this.albumService.update(id, updateAlbumDto);
   }
 
   @Delete(':id')
   @HttpCode(204)
-  remove(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string): void {
-    this.albumService.remove(id);
+  async remove(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ): Promise<void> {
+    await this.albumService.remove(id);
   }
 }
