@@ -7,9 +7,11 @@
 
 ## Downloading
 
-```
-git clone {repository URL}
-```
+In your terminal enter next commands
+
+1. `git clone https://github.com/NMakarevich/nodejs2022Q2-service`
+2. `cd nodejs2022Q2-service`
+3. `git chekout postgresql-orm-typeorm`
 
 ## Installing NPM modules
 
@@ -17,11 +19,14 @@ git clone {repository URL}
 npm install
 ```
 
+## Using .env
+
+Create `.env` file using `.env.example` as example.
+
 ## Running application
 
-```
-npm start
-```
+1. Run Docker app
+2. In terminal enter `docker-compose up`
 
 After starting the app on port (4000 as default) you can open
 in your browser OpenAPI documentation by typing http://localhost:4000/doc/.
