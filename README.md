@@ -11,7 +11,7 @@ In your terminal enter next commands
 
 1. `git clone https://github.com/NMakarevich/nodejs2022Q2-service`
 2. `cd nodejs2022Q2-service`
-3. `git chekout containerization-docker`
+3. `git chekout postgresql-orm-typeorm`
 
 ## Installing NPM modules
 
