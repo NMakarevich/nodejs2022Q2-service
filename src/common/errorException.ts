@@ -19,6 +19,10 @@ class ErrorException {
   forbiddenException(message: string) {
     throw new HttpException(message, HttpStatus.FORBIDDEN);
   }
+
+  unauthorizedException(message: string) {
+    throw new HttpException(message, HttpStatus.UNAUTHORIZED);
+  }
 }
 
 const errorException = new ErrorException();
