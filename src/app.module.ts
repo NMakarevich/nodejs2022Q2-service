@@ -8,6 +8,9 @@ import { TrackModule } from './resources/track/track.module';
 import { FavouritesModule } from './resources/favourites/favourites.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppDataSource } from './data-source';
+import { AuthModule } from './resources/auth/auth.module';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from './resources/auth/guards/jwt-auth.guard';
 
 @Module({
   imports: [
@@ -17,8 +20,15 @@ import { AppDataSource } from './data-source';
     AlbumModule,
     TrackModule,
     FavouritesModule,
+    AuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+  ],
 })
 export class AppModule {}
