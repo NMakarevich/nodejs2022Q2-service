@@ -30,14 +30,14 @@ export class AuthService {
 
   login = async (user: UserEntity) => {
     const { id, login } = user;
-    const token = this.jwtService.sign(
+    const accessToken = await this.jwtService.signAsync(
       { userId: id, login },
       {
         secret: process.env.JWT_SECRET_KEY,
         expiresIn: process.env.TOKEN_EXPIRE_TIME,
       },
     );
-    const refreshToken = this.jwtService.sign(
+    const refreshToken = await this.jwtService.signAsync(
       {
         userId: id,
         login,
@@ -47,7 +47,7 @@ export class AuthService {
         expiresIn: process.env.TOKEN_REFRESH_EXPIRE_TIME,
       },
     );
-    return { token, refreshToken };
+    return { accessToken, refreshToken };
   };
 
   refresh = async (body: { refreshToken: string }) => {
