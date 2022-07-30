@@ -42,10 +42,12 @@ export class UserService {
     const user = await this.findOne(id);
 
     const { oldPassword, newPassword } = updateUserDto;
-    if (oldPassword !== user.password)
-      errorException.forbiddenException('Incorrect old password');
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    console.log(isMatch);
+    if (!isMatch) errorException.forbiddenException('Incorrect old password');
 
-    user.password = newPassword;
+    const saltOrRounds = parseInt(process.env.CRYPT_SALT);
+    user.password = await bcrypt.hash(newPassword, saltOrRounds);
     return await this.userRepository.save(user);
   };
 
