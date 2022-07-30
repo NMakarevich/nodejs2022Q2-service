@@ -5,6 +5,8 @@ import { UserEntity } from './entities/user.entity';
 import errorException from '../../common/errorException';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import 'dotenv/config';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -14,9 +16,10 @@ export class UserService {
   ) {}
 
   create = async (createUserDto: CreateUserDto) => {
-    const newUser = new UserEntity({
-      ...createUserDto,
-    });
+    const { password } = createUserDto;
+    const saltOrRounds = parseInt(process.env.CRYPT_SALT);
+    createUserDto.password = await bcrypt.hash(password, saltOrRounds);
+    const newUser = new UserEntity(createUserDto);
     const user = this.userRepository.create(newUser);
     return await this.userRepository.save(user);
   };
