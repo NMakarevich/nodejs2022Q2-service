@@ -43,7 +43,6 @@ export class UserService {
 
     const { oldPassword, newPassword } = updateUserDto;
     const isMatch = await bcrypt.compare(oldPassword, user.password);
-    console.log(isMatch);
     if (!isMatch) errorException.forbiddenException('Incorrect old password');
 
     const saltOrRounds = parseInt(process.env.CRYPT_SALT);
