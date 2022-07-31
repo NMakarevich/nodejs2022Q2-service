@@ -22,7 +22,7 @@ export class AuthController {
   @UseInterceptors(ClassSerializerInterceptor)
   @HttpCode(201)
   async signup(@Body() createUserDto: CreateUserDto) {
-    await this.authService.signup(createUserDto);
+    return await this.authService.signup(createUserDto);
   }
 
   @Public()
