@@ -34,6 +34,7 @@ export class AuthController {
     return await this.authService.login(req.user);
   }
 
+  @Public()
   @Post('/refresh')
   @UseInterceptors(ClassSerializerInterceptor)
   @HttpCode(200)
