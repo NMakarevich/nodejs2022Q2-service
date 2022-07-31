@@ -55,11 +55,12 @@ export class AuthService {
     if (!refreshToken)
       errorException.unauthorizedException('No refresh token in body');
 
-    const { userId, login, exp } = this.jwtService.verify(refreshToken);
-    if (exp * 1000 < Date.now())
-      errorException.forbiddenException('Refresh token is outdated');
-
-    const user = new UserEntity({ id: userId, login });
-    return await this.login(user);
+    try {
+      const { userId, login } = this.jwtService.verify(refreshToken);
+      const user = new UserEntity({ id: userId, login });
+      return await this.login(user);
+    } catch {
+      errorException.forbiddenException('Refresh token is outdated or invalid');
+    }
   };
 }
