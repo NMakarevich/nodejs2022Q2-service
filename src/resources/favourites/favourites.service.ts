@@ -62,9 +62,7 @@ export class FavouritesService {
     if (!artist) errorException.unprocessableException('Artist');
 
     const favourites = await this.getFavourites();
-    console.log(favourites);
-    if (favourites.artists) favourites.artists.push(artist);
-    else favourites.artists = [artist];
+    favourites.artists.push(artist);
 
     await this.favouritesRepository.save(favourites);
 
