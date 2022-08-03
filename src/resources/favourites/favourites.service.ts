@@ -22,38 +22,38 @@ export class FavouritesService {
 
   create = async () => {
     const favourites = this.favouritesRepository.create();
-    favourites.tracksIds = [];
-    favourites.albumsIds = [];
-    favourites.artistsIds = [];
     await this.favouritesRepository.save(favourites);
   };
 
   getFavourites = async () => {
-    let favourites = await this.favouritesRepository.find();
+    let favourites = await this.favouritesRepository.find({
+      relations: {
+        albums: true,
+        artists: true,
+        tracks: true,
+      },
+    });
     if (favourites.length === 0) {
       await this.create();
-      favourites = await this.favouritesRepository.find();
+      favourites = await this.favouritesRepository.find({
+        relations: {
+          albums: true,
+          artists: true,
+          tracks: true,
+        },
+      });
     }
     return favourites[0];
   };
 
   findAll = async () => {
-    const { albumsIds, artistsIds, tracksIds } = await this.getFavourites();
-
-    const albumsObjects = await Promise.all(
-      albumsIds.map((albumId) => this.albumService.findOne(albumId)),
-    );
-    const artistsObjects = await Promise.all(
-      artistsIds.map((artistId) => this.artistService.findOne(artistId)),
-    );
-    const tracksObjects = await Promise.all(
-      tracksIds.map((trackId) => this.trackService.findOne(trackId)),
-    );
+    const favourites = await this.getFavourites();
+    console.log(favourites.artists);
 
     return {
-      albums: albumsObjects.filter((album) => album),
-      artists: artistsObjects.filter((artist) => artist),
-      tracks: tracksObjects.filter((track) => track),
+      albums: favourites.albums,
+      artists: favourites.artists,
+      tracks: favourites.tracks,
     };
   };
 
@@ -62,7 +62,9 @@ export class FavouritesService {
     if (!artist) errorException.unprocessableException('Artist');
 
     const favourites = await this.getFavourites();
-    favourites.artistsIds.push(artistId);
+    console.log(favourites);
+    if (favourites.artists) favourites.artists.push(artist);
+    else favourites.artists = [artist];
 
     await this.favouritesRepository.save(favourites);
 
@@ -74,7 +76,7 @@ export class FavouritesService {
     if (!album) errorException.unprocessableException('Album');
 
     const favourites = await this.getFavourites();
-    favourites.albumsIds.push(albumId);
+    favourites.albums.push(album);
 
     await this.favouritesRepository.save(favourites);
 
@@ -86,7 +88,7 @@ export class FavouritesService {
     if (!track) errorException.unprocessableException('Track');
 
     const favourites = await this.getFavourites();
-    favourites.tracksIds.push(trackId);
+    favourites.tracks.push(track);
 
     await this.favouritesRepository.save(favourites);
 
@@ -95,40 +97,33 @@ export class FavouritesService {
 
   removeArtist = async (id: string, skipError = false) => {
     const favourites = await this.getFavourites();
-    const artistIndex = favourites.artistsIds.findIndex(
-      (artistId) => artistId === id,
+    const artist = favourites.artists.find((artist) => artist.id === id);
+
+    if (!artist && !skipError) errorException.unprocessableException('Artist');
+
+    favourites.artists = favourites.artists.filter(
+      (artist) => artist.id !== id,
     );
-
-    if (artistIndex === -1 && !skipError)
-      errorException.unprocessableException('Artist');
-
-    favourites.artistsIds.splice(artistIndex, 1);
     await this.favouritesRepository.save(favourites);
   };
 
   removeAlbum = async (id: string, skipError = false) => {
     const favourites = await this.getFavourites();
-    const albumIndex = favourites.albumsIds.findIndex(
-      (albumId) => albumId === id,
-    );
+    const album = favourites.albums.find((album) => album.id === id);
 
-    if (albumIndex === -1 && !skipError)
-      errorException.unprocessableException('Album');
+    if (!album && !skipError) errorException.unprocessableException('Album');
 
-    favourites.albumsIds.splice(albumIndex, 1);
+    favourites.albums = favourites.albums.filter((album) => album.id !== id);
     await this.favouritesRepository.save(favourites);
   };
 
   removeTrack = async (id: string, skipError = false) => {
     const favourites = await this.getFavourites();
-    const trackIndex = favourites.tracksIds.findIndex(
-      (trackId) => trackId === id,
-    );
+    const track = favourites.tracks.find((track) => track.id === id);
 
-    if (trackIndex === -1 && !skipError)
-      errorException.unprocessableException('Track');
+    if (!track && !skipError) errorException.unprocessableException('Track');
 
-    favourites.tracksIds.splice(trackIndex, 1);
+    favourites.tracks = favourites.tracks.filter((track) => track.id !== id);
     await this.favouritesRepository.save(favourites);
   };
 }
