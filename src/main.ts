@@ -24,7 +24,12 @@ async function bootstrap() {
   );
 
   SwaggerModule.setup('doc', app, parse(document));
-
   await app.listen(PORT);
+  process.on('uncaughtException', async (error) => {
+    await logger.customError(error);
+  });
+  process.on('unhandledRejection', async (reason) => {
+    await logger.customError(reason);
+  });
 }
 bootstrap();
