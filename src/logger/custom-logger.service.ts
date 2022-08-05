@@ -1,38 +1,41 @@
-import { LoggerService } from '@nestjs/common';
+import { ConsoleLogger } from '@nestjs/common';
 import * as path from 'path';
 import { readdir, mkdir, appendFile, stat } from 'fs/promises';
 import { createWriteStream } from 'fs';
 import 'dotenv/config';
 
-export class CustomLogger implements LoggerService {
-  log = async (message: string): Promise<void> => {
-    let order = 0;
-    const fileSize = parseInt(process.env.LOG_FILE_SIZE_KB) * 1024;
-    let filename = createFileName('log', order);
+export class CustomLogger extends ConsoleLogger {
+  private fileSize = parseInt(process.env.LOG_FILE_SIZE_KB) * 1024;
+  customLog = async (message: string): Promise<void> => {
+    await mkdir(path.join(process.cwd(), 'logs/logs'), { recursive: true });
     const dirname = path.resolve(process.cwd(), 'logs/logs');
-    await mkdir(dirname, { recursive: true });
 
     const ls = await readdir(dirname);
+    let order = ls.length === 0 ? 0 : ls.length - 1;
+    let filename = ls[ls.length - 1] || createFileName('log', order);
     if (ls.length === 0) {
       await createFile(dirname, filename);
     }
 
     const { size } = await stat(path.resolve(dirname, filename));
-    if (size >= fileSize) {
+    const messageSize = Buffer.byteLength(message, 'utf-8') + 23;
+
+    if (size + messageSize >= this.fileSize) {
       order += 1;
       filename = createFileName('log', order);
       await createFile(dirname, filename);
     }
 
     const date = new Date().toLocaleString();
+    this.log(message);
     await appendFile(path.resolve(dirname, filename), `${date} - ${message}\n`);
   };
 
-  error(message: any, ...optionalParams: any[]): any {
+  customError(message: any, ...optionalParams: any[]): any {
     console.log(message);
   }
 
-  warn(message: any, ...optionalParams: any[]): any {
+  customWarn(message: any, ...optionalParams: any[]): any {
     console.log(message);
   }
 }
