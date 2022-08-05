@@ -48,7 +48,6 @@ export class FavouritesService {
 
   findAll = async () => {
     const favourites = await this.getFavourites();
-    console.log(favourites.artists);
 
     return {
       albums: favourites.albums,
