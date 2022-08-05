@@ -6,6 +6,7 @@ import 'dotenv/config';
 
 export class CustomLogger extends ConsoleLogger {
   private fileSize = parseInt(process.env.LOG_FILE_SIZE_KB) * 1024;
+  private logLevel = parseInt(process.env.LOG_LEVEL);
   customLog = async (message: string): Promise<void> => {
     await saveLog('log', message, this.fileSize);
     this.log(message);
