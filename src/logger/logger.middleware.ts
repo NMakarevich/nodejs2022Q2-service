@@ -5,13 +5,15 @@ import { CustomLogger } from './custom-logger.service';
 @Injectable()
 export class LoggerMiddleware implements NestMiddleware {
   constructor(private readonly logger: CustomLogger) {}
-  async use(req: Request, res: Response, next: NextFunction) {
+  use(req: Request, res: Response, next: NextFunction) {
     const { url, method, query, body } = req;
-    const { statusCode } = res;
-    const message = `${method} ${url} ${JSON.stringify(query)} ${JSON.stringify(
-      body,
-    )} - ${statusCode}`;
-    await this.logger.log(message);
+    res.on('finish', async () => {
+      const { statusCode } = res;
+      const message = `${method} ${url} ${JSON.stringify(
+        query,
+      )} ${JSON.stringify(body)} - ${statusCode}`;
+      await this.logger.log(message);
+    });
     next();
   }
 }
