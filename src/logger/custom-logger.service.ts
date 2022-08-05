@@ -27,6 +27,14 @@ export class CustomLogger implements LoggerService {
     const date = new Date().toLocaleString();
     await appendFile(path.resolve(dirname, filename), `${date} - ${message}\n`);
   };
+
+  error(message: any, ...optionalParams: any[]): any {
+    console.log(message);
+  }
+
+  warn(message: any, ...optionalParams: any[]): any {
+    console.log(message);
+  }
 }
 
 function createFileName(name: string, order: number) {
