@@ -7,12 +7,14 @@ import { resolve } from 'path';
 import { parse } from 'yaml';
 import { ValidationPipe } from '@nestjs/common';
 import 'reflect-metadata';
+import { CustomLogger } from './logger/custom-logger.service';
 
 const PORT = process.env.PORT || 4000;
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  app.useLogger(app.get(CustomLogger));
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
 
   const document = await readFile(
