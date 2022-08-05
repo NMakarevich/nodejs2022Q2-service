@@ -12,12 +12,22 @@ export class CustomLogger extends ConsoleLogger {
     this.log(message);
   };
 
-  customError(message: any, ...optionalParams: any[]): any {
-    console.log(message);
-  }
+  customError = async (error: any) => {
+    if (this.logLevel < 1) return;
+    if (error instanceof Error) {
+      const { message, name } = error;
+      const errorMessage = `${name}: ${message}`;
+      await saveLog('error', errorMessage, this.fileSize);
+      this.error(message);
+    } else {
+      await saveLog('error', error, this.fileSize);
+      this.error(error);
+    }
+  };
 
-  customWarn(message: any, ...optionalParams: any[]): any {
-    console.log(message);
+  customWarn(message: any): any {
+    if (this.logLevel < 2) return;
+    this.warn(message);
   }
 }
 
