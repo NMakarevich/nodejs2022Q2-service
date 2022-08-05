@@ -12,11 +12,10 @@ import { CustomLogger } from './logger/custom-logger.service';
 const PORT = process.env.PORT || 4000;
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, {
-    bufferLogs: true,
-  });
+  const app = await NestFactory.create(AppModule);
 
-  app.useLogger(app.get(CustomLogger));
+  const logger = new CustomLogger();
+  app.useLogger(logger);
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
 
   const document = await readFile(
