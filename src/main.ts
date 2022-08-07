@@ -7,23 +7,13 @@ import { resolve } from 'path';
 import { parse } from 'yaml';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import 'reflect-metadata';
+import { CustomLogger } from './logger/custom-logger.service';
 
 const PORT = process.env.PORT || 4000;
 
-const logLevel = parseInt(process.env.LOG_LEVEL);
-
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
-    logger:
-      logLevel === 0
-        ? ['log']
-        : logLevel === 1
-        ? ['log', 'error']
-        : logLevel === 2
-        ? ['log', 'error', 'warn']
-        : logLevel === 3
-        ? ['log', 'error', 'warn', 'debug']
-        : ['log', 'error', 'warn', 'debug', 'verbose'],
+    logger: new CustomLogger(),
   });
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
 

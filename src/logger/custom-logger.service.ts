@@ -6,6 +6,7 @@ import 'dotenv/config';
 
 export class CustomLogger extends ConsoleLogger {
   private fileSize = parseInt(process.env.LOG_FILE_SIZE_KB) * 1024;
+  private logLevel = parseInt(process.env.LOG_LEVEL);
 
   constructor() {
     super();
@@ -17,6 +18,7 @@ export class CustomLogger extends ConsoleLogger {
   };
 
   error = async (error: any, stack?: string, context?: string) => {
+    if (this.logLevel < 1) return;
     super.error(error, stack, context);
     if (error instanceof Error) {
       const { message, name } = error;
@@ -29,9 +31,20 @@ export class CustomLogger extends ConsoleLogger {
   };
 
   warn = async (message: any, context?: string) => {
+    if (this.logLevel < 2) return;
     super.warn(message, context);
     await saveLog('warn', message, this.fileSize);
   };
+
+  debug(message: any, context?: string) {
+    if (this.logLevel < 3) return;
+    super.debug(message, context);
+  }
+
+  verbose(message: any, context?: string) {
+    if (this.logLevel < 4) return;
+    super.verbose(message, context);
+  }
 }
 
 async function saveLog(name: string, message: string, fileSize: number) {
