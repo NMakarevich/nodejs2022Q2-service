@@ -6,30 +6,31 @@ import 'dotenv/config';
 
 export class CustomLogger extends ConsoleLogger {
   private fileSize = parseInt(process.env.LOG_FILE_SIZE_KB) * 1024;
-  private logLevel = parseInt(process.env.LOG_LEVEL);
 
-  customLog = async (message: string): Promise<void> => {
+  constructor() {
+    super();
+  }
+
+  log = async (message: any, context?: string) => {
+    super.log(message, context);
     await saveLog('log', message, this.fileSize);
-    this.log(message);
   };
 
-  customError = async (error: any): Promise<void> => {
-    if (this.logLevel < 1) return;
+  error = async (error: any, stack?: string, context?: string) => {
+    super.error(error, stack, context);
     if (error instanceof Error) {
       const { message, name } = error;
-      const errorMessage = `${name}: ${message}`;
+      const errorMessage = `${name}: ${message}\n ${context}`;
       await saveLog('error', errorMessage, this.fileSize);
-      this.error(message);
     } else {
-      await saveLog('error', error, this.fileSize);
-      this.error(error);
+      const errorMessage = `${stack}: ${error}`;
+      await saveLog('error', errorMessage, this.fileSize);
     }
   };
 
-  customWarn = async (message: any): Promise<void> => {
-    if (this.logLevel < 2) return;
+  warn = async (message: any, context?: string) => {
+    super.warn(message, context);
     await saveLog('warn', message, this.fileSize);
-    this.warn(message);
   };
 }
 
@@ -50,7 +51,7 @@ async function saveLog(name: string, message: string, fileSize: number) {
 
   if (size + messageSize + dateSize >= fileSize) {
     order += 1;
-    filename = generateFileName('log', order);
+    filename = generateFileName(name, order);
     await createFile(dirname, filename);
   }
 
