@@ -16,9 +16,14 @@ export class UserService {
   ) {}
 
   create = async (createUserDto: CreateUserDto) => {
-    const { password } = createUserDto;
+    const { login, password } = createUserDto;
+    const isExistedUser = await this.findByLogin(login);
+    if (isExistedUser)
+      errorException.conflictException(`User with login ${login} is exist`);
+
     const saltOrRounds = parseInt(process.env.CRYPT_SALT);
     createUserDto.password = await bcrypt.hash(password, saltOrRounds);
+
     const newUser = new UserEntity(createUserDto);
     const user = this.userRepository.create(newUser);
     return await this.userRepository.save(user);
