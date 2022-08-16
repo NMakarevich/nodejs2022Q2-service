@@ -16,8 +16,8 @@ services:
     environment:
       - PORT=${PORT}
     restart: always
-  database:
-    container_name: rest-service-database
+  postgres:
+    container_name: postgres
     build:
       dockerfile: ./database/Dockerfile
       context: .
