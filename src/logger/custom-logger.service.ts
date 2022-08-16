@@ -17,15 +17,15 @@ export class CustomLogger extends ConsoleLogger {
     await saveLog('log', message, this.fileSize);
   };
 
-  error = async (error: any, stack?: string, context?: string) => {
+  error = async (error: any, ...optionalParams) => {
     if (this.logLevel < 1) return;
-    super.error(error, stack, context);
+    super.error(error, ...optionalParams);
     if (error instanceof Error) {
       const { message, name } = error;
-      const errorMessage = `${name}: ${message}\n ${context}`;
+      const errorMessage = `${name}: ${message}\n`;
       await saveLog('error', errorMessage, this.fileSize);
     } else {
-      const errorMessage = `${stack}: ${error}`;
+      const errorMessage = `${error}`;
       await saveLog('error', errorMessage, this.fileSize);
     }
   };

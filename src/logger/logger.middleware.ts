@@ -11,7 +11,10 @@ export class LoggerMiddleware implements NestMiddleware {
       const message = `${method} ${url} queries: ${JSON.stringify(
         query,
       )} body: ${JSON.stringify(body)} - ${statusCode}`;
-      await this.logger.log(message);
+      if (Math.floor(statusCode / 100) === 2) await this.logger.log(message);
+      else if (Math.floor(statusCode / 100) === 4)
+        await this.logger.error(message);
+      else await this.logger.warn(message);
     });
     next();
   }
