@@ -20,8 +20,8 @@ class ErrorException {
     throw new HttpException(message, HttpStatus.FORBIDDEN);
   }
 
-  unauthorizedException(message: string) {
-    throw new HttpException(message, HttpStatus.UNAUTHORIZED);
+  conflictException(message: string) {
+    throw new HttpException(message, HttpStatus.CONFLICT);
   }
 }
 
