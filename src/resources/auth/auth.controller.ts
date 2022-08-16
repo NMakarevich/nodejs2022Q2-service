@@ -2,6 +2,7 @@ import {
   Body,
   ClassSerializerInterceptor,
   Controller,
+  Headers,
   HttpCode,
   Post,
   Request,
@@ -34,11 +35,10 @@ export class AuthController {
     return await this.authService.login(req.user);
   }
 
-  @Public()
   @Post('/refresh')
   @UseInterceptors(ClassSerializerInterceptor)
   @HttpCode(200)
-  async refresh(@Request() req) {
-    return await this.authService.refresh(req.body);
+  async refresh(@Headers('authorization') authorization) {
+    return await this.authService.refresh(authorization);
   }
 }

@@ -50,10 +50,8 @@ export class AuthService {
     return { accessToken, refreshToken };
   };
 
-  refresh = async (body: { refreshToken: string }) => {
-    const { refreshToken } = body;
-    if (!refreshToken)
-      errorException.unauthorizedException('No refresh token in body');
+  refresh = async (authorization) => {
+    const refreshToken = authorization.split(' ')[1];
 
     try {
       const { userId, login } = this.jwtService.verify(refreshToken);

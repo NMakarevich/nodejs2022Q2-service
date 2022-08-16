@@ -200,17 +200,6 @@ paths:
         - Auth
       summary: Update token and refresh token
       description: Update token and refresh token
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              title: example
-              properties:
-                refreshToken:
-                  type: string
-                  description: Refresh Token
 
       responses:
         200:
