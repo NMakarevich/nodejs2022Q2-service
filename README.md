@@ -17,6 +17,10 @@ git clone {repository URL}
 npm install
 ```
 
+## Using .env
+
+Rename file `.env.example` to `.env` and enter the number of port.
+
 ## Running application
 
 ```
